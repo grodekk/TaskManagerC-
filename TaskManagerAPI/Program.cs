@@ -3,6 +3,8 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
 
 var app = builder.Build();
 
@@ -16,6 +18,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/api/test", () => Results.Ok(new { status = "ok" }));
+app.MapControllers();
 
 app.Run();
