@@ -8,54 +8,53 @@ namespace TaskManagerAPI.Controllers;
 [Route("api/tasks")]
 public class TasksController : ControllerBase
 {
-    private static List<TaskItem> tasks = new();
+    private readonly TaskService _service;
 
-    // GET: /api/tasks
-    [HttpGet]
-    public IActionResult GetAll()
+    public TasksController(TaskService service)
     {
-        return Ok(tasks);
+        _service = service;
     }
 
-    // GET: /api/tasks/1
+    [HttpGet]
+    public IActionResult GetAll()
+        => Ok(_service.GetAll());
+
     [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
-        var task = tasks.FirstOrDefault(x => x.Id == id);
-
-        if (task == null)
-            return NotFound();
-
+        var task = _service.GetById(id);
+        if (task == null) return NotFound();
         return Ok(task);
     }
 
-    // POST: /api/tasks
     [HttpPost]
     public IActionResult Create(CreateTaskDto dto)
     {
-        var task = new TaskItem
-        {
-            Id = tasks.Count + 1,
-            Title = dto.Title,
-            IsDone = false
-        };
-
-        tasks.Add(task);
-
+        var task = _service.Create(dto);
         return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
     }
 
-    // DELETE: /api/tasks/1
+    [HttpPut("{id}")]
+    public IActionResult Update(int id, UpdateTaskDto dto)
+    {
+        var success = _service.Update(id, dto);
+        if (!success) return NotFound();
+        return NoContent();
+    }
+
+    [HttpPatch("{id}/status")]
+    public IActionResult UpdateStatus(int id, UpdateTaskStatusDto dto)
+    {
+        var success = _service.UpdateStatus(id, dto);
+        if (!success) return NotFound();
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        var task = tasks.FirstOrDefault(x => x.Id == id);
-
-        if (task == null)
-            return NotFound();
-
-        tasks.Remove(task);
-
+        var success = _service.Delete(id);
+        if (!success) return NotFound();
         return NoContent();
     }
 }
