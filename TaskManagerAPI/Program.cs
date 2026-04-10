@@ -1,9 +1,11 @@
 using Scalar.AspNetCore;
+using TaskManagerAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSingleton<TaskService>();
 
 
 var app = builder.Build();
