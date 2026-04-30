@@ -8,4 +8,5 @@ obj/
 *.exe
 *.log
 *.nuget.*
+*.db
 project.assets.json

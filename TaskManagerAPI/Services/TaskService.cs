@@ -1,30 +1,36 @@
 using TaskManagerAPI.Models;
 using TaskManagerAPI.DTOs;
+using TaskManagerAPI.Data;
 
 namespace TaskManagerAPI.Services;
 
 public class TaskService
 {
-    private readonly List<TaskItem> _tasks = new();
-    private int _nextId = 1;
+    private readonly AppDbContext _db;
+
+    public TaskService(AppDbContext db)
+    {
+        _db = db;
+    }       
 
     public List<TaskItem> GetAll()
-        => _tasks;
+    => _db.Tasks.ToList();
 
     public TaskItem? GetById(int id)
-        => _tasks.FirstOrDefault(x => x.Id == id);
+        => _db.Tasks.FirstOrDefault(x => x.Id == id);
 
     public TaskItem Create(CreateTaskDto dto)
     {
         var task = new TaskItem
-        {
-            Id = _nextId++,
+        {            
             Title = dto.Title,
             Description = dto.Description,
             IsDone = false
         };
 
-        _tasks.Add(task);
+        _db.Tasks.Add(task);
+        _db.SaveChanges();        
+
         return task;
     }
 
@@ -36,6 +42,8 @@ public class TaskService
         task.Title = dto.Title;
         task.Description = dto.Description;
 
+        _db.SaveChanges();
+
         return true;
     }
 
@@ -45,6 +53,9 @@ public class TaskService
         if (task == null) return false;
 
         task.IsDone = dto.IsDone;
+
+        _db.SaveChanges();
+
         return true;
     }
 
@@ -53,7 +64,9 @@ public class TaskService
         var task = GetById(id);
         if (task == null) return false;
 
-        _tasks.Remove(task);
+        _db.Tasks.Remove(task);
+        _db.SaveChanges();
+
         return true;
     }
 }
