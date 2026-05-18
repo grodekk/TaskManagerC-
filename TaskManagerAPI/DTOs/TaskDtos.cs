@@ -19,6 +19,8 @@ public class CreateTaskDto
 
     [MaxLength(500)]
     public string? Description { get; set; }
+
+    public int? ProjectId { get; set; }
 }
 
 public class UpdateTaskDto

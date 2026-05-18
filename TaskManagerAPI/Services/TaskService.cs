@@ -14,7 +14,7 @@ public class TaskService
     }       
 
     public List<TaskItem> GetAll()
-    => _db.Tasks.ToList();
+        => _db.Tasks.ToList();
 
     public TaskItem? GetById(int id)
         => _db.Tasks.FirstOrDefault(x => x.Id == id);
@@ -25,6 +25,7 @@ public class TaskService
         {            
             Title = dto.Title,
             Description = dto.Description,
+            ProjectId = dto.ProjectId,
             IsDone = false
         };
 
@@ -69,4 +70,9 @@ public class TaskService
 
         return true;
     }
+
+    public List<TaskItem> GetTasksByProject(int projectId)
+        => _db.Tasks
+            .Where(x => x.ProjectId == projectId)
+            .ToList();
 }

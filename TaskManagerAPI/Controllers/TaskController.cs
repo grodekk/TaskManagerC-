@@ -58,4 +58,8 @@ public class TasksController : ControllerBase
         if (!success) return NotFound();
         return NoContent();
     }
+
+    [HttpGet("project/{projectId}")]
+    public IActionResult GetTasksByProject(int projectId)
+        => Ok(_service.GetTasksByProject(projectId));
 }
