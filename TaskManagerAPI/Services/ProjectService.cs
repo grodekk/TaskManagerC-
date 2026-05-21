@@ -40,4 +40,25 @@ public class ProjectService
         _db.SaveChanges();
         return project;
     }
+
+    public ProjectWithTasksDto? GetById(int id)
+    {
+        return _db.Projects
+            .Include(p => p.Tasks)
+            .Where(p => p.Id == id)
+            .Select(p => new ProjectWithTasksDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Tasks = p.Tasks.Select(t => new TaskDto
+                {
+                    Id = t.Id,
+                    Title = t.Title,
+                    Description = t.Description,
+                    IsDone = t.IsDone
+                }).ToList()
+            })
+            .FirstOrDefault();
+    }
+
 }
