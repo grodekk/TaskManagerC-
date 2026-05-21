@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TaskManagerAPI.DTOs;
 
 public class CreateProjectDto
