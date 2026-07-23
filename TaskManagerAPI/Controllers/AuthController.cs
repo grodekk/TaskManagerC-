@@ -11,10 +11,12 @@ namespace TaskManagerAPI.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _service;
+    private readonly IConfiguration _config;
 
-    public AuthController(AuthService service)
+    public AuthController(AuthService service, IConfiguration config)
     {
         _service = service;
+        _config = config;
     }
 
     [HttpPost("register")]
@@ -34,7 +36,7 @@ public class AuthController : ControllerBase
         if (!_service.Login(dto))
             return Unauthorized("Invalid credentials");
 
-        var token = "GENERATE_JWT_HERE";
+        var token = _service.GenerateToken(dto.Username, _config);
 
         return Ok(new { token });
     }

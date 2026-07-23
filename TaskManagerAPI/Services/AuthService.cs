@@ -1,6 +1,10 @@
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TaskManagerAPI.Services;
 
@@ -37,5 +41,29 @@ public class AuthService
 
         var isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
         return isValid;
+    }    
+
+
+    public string GenerateToken(string username, IConfiguration config)
+    {
+        var claims = new[]
+        {
+        new Claim(ClaimTypes.Name, username)
+    };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+
+        var creds = new SigningCredentials(
+            key,
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddHours(1),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
