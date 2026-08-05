@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace TaskManagerAPI.Controllers;
 
@@ -17,22 +18,47 @@ public class ProjectsController : ControllerBase
         _service = service;
     }
 
+    private int GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        return int.Parse(userIdClaim!.Value);
+    }
+
     [HttpGet]
     public IActionResult GetAll()
-        => Ok(_service.GetAll());
+    {
+        var userId = GetUserId();
+        var projects = _service.GetAll(userId);
 
+        return Ok(projects);
+    }
+
+    
     [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
-        var project = _service.GetById(id);
-        if (project == null) return NotFound();
+        var userId = GetUserId();
+        var project = _service.GetById(id, userId);
+
+        if (project == null)
+            return NotFound();
+
         return Ok(project);
     }
+    
 
     [HttpPost]
     public IActionResult Create(CreateProjectDto dto)
     {
-        var project = _service.Create(dto);
-        return CreatedAtAction(nameof(GetById), new { id = project.Id }, project);
+        var userId = GetUserId();
+
+        var project = _service.Create(dto, userId);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = project.Id },
+            project
+        );
     }
 }

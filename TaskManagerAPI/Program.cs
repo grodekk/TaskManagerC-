@@ -1,11 +1,14 @@
-using Scalar.AspNetCore;
-using TaskManagerAPI.Services;
-using Microsoft.EntityFrameworkCore;
-using TaskManagerAPI.Data;
+using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+
+using Scalar.AspNetCore;
+
+using TaskManagerAPI.Data;
+using TaskManagerAPI.Services;
+using TaskManagerAPI.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +26,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddOperationTransformer<AuthOperationTransformer>();
+});
 builder.Services.AddControllers();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<ProjectService>();

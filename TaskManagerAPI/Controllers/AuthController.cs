@@ -33,11 +33,14 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login(LoginDto dto)
     {
-        if (!_service.Login(dto))
+        var user = _service.Login(dto);
+
+        if (user == null)
             return Unauthorized("Invalid credentials");
 
-        var token = _service.GenerateToken(dto.Username, _config);
+        var token = _service.GenerateToken(user, _config);
 
         return Ok(new { token });
     }
+
 }

@@ -33,22 +33,32 @@ public class AuthService
     }
 
 
-    public bool Login(LoginDto dto)
+    public User? Login(LoginDto dto)
     {
-        var user = _db.Users.FirstOrDefault(u => u.Username == dto.Username);
+        var user = _db.Users
+            .FirstOrDefault(u => u.Username == dto.Username);
+
         if (user == null)
-            return false;
+            return null;
 
-        var isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
-        return isValid;
-    }    
+        var isValid = BCrypt.Net.BCrypt.Verify(
+            dto.Password,
+            user.PasswordHash
+        );
+
+        if (!isValid)
+            return null;
+
+        return user;
+    }
 
 
-    public string GenerateToken(string username, IConfiguration config)
+    public string GenerateToken(User user, IConfiguration config)
     {
         var claims = new[]
-        {
-        new Claim(ClaimTypes.Name, username)
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Username)
     };
 
         var key = new SymmetricSecurityKey(

@@ -14,10 +14,11 @@ public class ProjectService
         _db = db;
     }
 
-    public List<ProjectWithTasksDto> GetAll()
+    public List<ProjectWithTasksDto> GetAll(int userId)
     {
         return _db.Projects
             .Include(p => p.Tasks)
+            .Where(p => p.UserId == userId)
             .Select(p => new ProjectWithTasksDto
             {
                 Id = p.Id,
@@ -33,19 +34,21 @@ public class ProjectService
             .ToList();
     }
 
-    public Project Create(CreateProjectDto dto)
+    public Project Create(CreateProjectDto dto, int userId)
     {
-        var project = new Project { Name = dto.Name };
+        var project = new Project { Name = dto.Name, UserId = userId };
+
         _db.Projects.Add(project);
         _db.SaveChanges();
+
         return project;
     }
 
-    public ProjectWithTasksDto? GetById(int id)
+    public ProjectWithTasksDto? GetById(int id, int userId)
     {
         return _db.Projects
             .Include(p => p.Tasks)
-            .Where(p => p.Id == id)
+            .Where(p => p.Id == id && p.UserId == userId)
             .Select(p => new ProjectWithTasksDto
             {
                 Id = p.Id,
