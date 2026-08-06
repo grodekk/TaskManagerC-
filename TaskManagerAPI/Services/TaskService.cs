@@ -11,16 +11,31 @@ public class TaskService
     public TaskService(AppDbContext db)
     {
         _db = db;
-    }       
+    }
 
-    public List<TaskItem> GetAll()
-        => _db.Tasks.ToList();
+    public List<TaskItem> GetAll(int userId)
+        => _db.Tasks
+            .Where(t => t.Project != null && t.Project.UserId == userId)
+            .ToList();
 
-    public TaskItem? GetById(int id)
-        => _db.Tasks.FirstOrDefault(x => x.Id == id);
+    public TaskItem? GetById(int id, int userId)
+        => _db.Tasks.FirstOrDefault(t =>
+            t.Id == id &&
+            t.Project != null &&
+            t.Project.UserId == userId);
 
-    public TaskItem Create(CreateTaskDto dto)
+    public TaskItem? Create(CreateTaskDto dto, int userId)
     {
+        if (dto.ProjectId == null)
+            return null;
+
+        var projectExists = _db.Projects.Any(p =>
+            p.Id == dto.ProjectId &&
+            p.UserId == userId);
+
+        if (!projectExists)
+            return null;
+
         var task = new TaskItem
         {            
             Title = dto.Title,
@@ -35,10 +50,12 @@ public class TaskService
         return task;
     }
 
-    public bool Update(int id, UpdateTaskDto dto)
+    public bool Update(int id, UpdateTaskDto dto, int userId)
     {
-        var task = GetById(id);
-        if (task == null) return false;
+        var task = GetById(id, userId);
+
+        if (task == null)
+            return false;
 
         task.Title = dto.Title;
         task.Description = dto.Description;
@@ -48,10 +65,12 @@ public class TaskService
         return true;
     }
 
-    public bool UpdateStatus(int id, UpdateTaskStatusDto dto)
+    public bool UpdateStatus(int id, UpdateTaskStatusDto dto, int userId)
     {
-        var task = GetById(id);
-        if (task == null) return false;
+        var task = GetById(id, userId);
+
+        if (task == null)
+            return false;
 
         task.IsDone = dto.IsDone;
 
@@ -60,9 +79,9 @@ public class TaskService
         return true;
     }
 
-    public bool Delete(int id)
+    public bool Delete(int id, int userId)
     {
-        var task = GetById(id);
+        var task = GetById(id, userId);
         if (task == null) return false;
 
         _db.Tasks.Remove(task);
@@ -71,8 +90,11 @@ public class TaskService
         return true;
     }
 
-    public List<TaskItem> GetTasksByProject(int projectId)
+    public List<TaskItem> GetTasksByProject(int projectId, int userId)
         => _db.Tasks
-            .Where(x => x.ProjectId == projectId)
+            .Where(t =>
+                t.ProjectId == projectId &&
+                t.Project != null &&
+                t.Project.UserId == userId)
             .ToList();
 }
