@@ -34,14 +34,23 @@ public class ProjectService
             .ToList();
     }
 
-    public Project Create(CreateProjectDto dto, int userId)
+    public ProjectWithTasksDto Create(CreateProjectDto dto, int userId)
     {
-        var project = new Project { Name = dto.Name, UserId = userId };
+        var project = new Project
+        {
+            Name = dto.Name,
+            UserId = userId
+        };
 
         _db.Projects.Add(project);
         _db.SaveChanges();
 
-        return project;
+        return new ProjectWithTasksDto
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Tasks = new List<TaskDto>()
+        };
     }
 
     public ProjectWithTasksDto? GetById(int id, int userId)
