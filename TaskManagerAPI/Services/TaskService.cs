@@ -13,22 +13,43 @@ public class TaskService
         _db = db;
     }
 
-    public List<TaskItem> GetAll(int userId)
+    public List<TaskDto> GetAll(int userId)
         => _db.Tasks
             .Where(t => t.Project != null && t.Project.UserId == userId)
-            .ToList();
+            .Select(t => new TaskDto
+            {
+                Id = t.Id,
+                ProjectId = t.ProjectId,
+                ProjectName = t.Project!.Name,
+                Title = t.Title,
+                Description = t.Description,
+                IsDone = t.IsDone
+            })
+        .ToList();
 
-    public TaskItem? GetById(int id, int userId)
-        => _db.Tasks.FirstOrDefault(t =>
+    public TaskDto? GetById(int id, int userId)
+        => _db.Tasks
+            .Where(t => t.Id == id && t.Project != null && t.Project.UserId == userId)
+            .Select(t => new TaskDto
+            {
+                Id = t.Id,
+                ProjectId = t.ProjectId,
+                ProjectName = t.Project!.Name,
+                Title = t.Title,
+                Description = t.Description,
+                IsDone = t.IsDone
+            })
+            .FirstOrDefault();
+
+    private TaskItem? GetEntityById(int id, int userId)
+    {
+        return _db.Tasks.FirstOrDefault(t =>
             t.Id == id &&
-            t.Project != null &&
             t.Project.UserId == userId);
+    }
 
     public TaskItem? Create(CreateTaskDto dto, int userId)
     {
-        if (dto.ProjectId == null)
-            return null;
-
         var projectExists = _db.Projects.Any(p =>
             p.Id == dto.ProjectId &&
             p.UserId == userId);
@@ -52,7 +73,7 @@ public class TaskService
 
     public bool Update(int id, UpdateTaskDto dto, int userId)
     {
-        var task = GetById(id, userId);
+        var task = GetEntityById(id, userId);
 
         if (task == null)
             return false;
@@ -67,7 +88,7 @@ public class TaskService
 
     public bool UpdateStatus(int id, UpdateTaskStatusDto dto, int userId)
     {
-        var task = GetById(id, userId);
+        var task = GetEntityById(id, userId);
 
         if (task == null)
             return false;
@@ -81,8 +102,10 @@ public class TaskService
 
     public bool Delete(int id, int userId)
     {
-        var task = GetById(id, userId);
-        if (task == null) return false;
+        var task = GetEntityById(id, userId);        
+        
+        if (task == null)
+            return false;
 
         _db.Tasks.Remove(task);
         _db.SaveChanges();

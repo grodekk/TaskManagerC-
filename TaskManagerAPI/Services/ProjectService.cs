@@ -25,7 +25,9 @@ public class ProjectService
                 Name = p.Name,
                 Tasks = p.Tasks.Select(t => new TaskDto
                 {
-                    Id = t.Id,
+                    Id = t.Id,      
+                    ProjectId = t.ProjectId,
+                    ProjectName = p.Name,
                     Title = t.Title,
                     Description = t.Description,
                     IsDone = t.IsDone
@@ -65,6 +67,8 @@ public class ProjectService
                 Tasks = p.Tasks.Select(t => new TaskDto
                 {
                     Id = t.Id,
+                    ProjectId = t.ProjectId,
+                    ProjectName = p.Name,
                     Title = t.Title,
                     Description = t.Description,
                     IsDone = t.IsDone

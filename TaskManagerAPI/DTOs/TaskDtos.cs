@@ -5,8 +5,13 @@ namespace TaskManagerAPI.DTOs;
 public class TaskDto
 {
     public int Id { get; set; }
+    public int ProjectId { get; set; }
+
+    public required string ProjectName { get; set; }
     public required string Title { get; set; }
+
     public string? Description { get; set; }
+
     public bool IsDone { get; set; }
 }
 
@@ -20,7 +25,7 @@ public class CreateTaskDto
     [MaxLength(500)]
     public string? Description { get; set; }
 
-    public required int ProjectId { get; set; }
+    public int ProjectId { get; set; }
 }
 
 public class UpdateTaskDto
