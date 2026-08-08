@@ -16,24 +16,24 @@ public class ProjectService
 
     public List<ProjectWithTasksDto> GetAll(int userId)
     {
-        return _db.Projects
+        var projects = _db.Projects
             .Include(p => p.Tasks)
             .Where(p => p.UserId == userId)
-            .Select(p => new ProjectWithTasksDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Tasks = p.Tasks.Select(t => new TaskDto
-                {
-                    Id = t.Id,      
-                    ProjectId = t.ProjectId,
-                    ProjectName = p.Name,
-                    Title = t.Title,
-                    Description = t.Description,
-                    IsDone = t.IsDone
-                }).ToList()
-            })
             .ToList();
+
+        return projects.Select(p => new ProjectWithTasksDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Tasks = p.Tasks.Select(t => new TaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                IsDone = t.IsDone,
+                ProjectName = p.Name,
+            }).ToList()
+        }).ToList();
     }
 
     public ProjectWithTasksDto Create(CreateProjectDto dto, int userId)
