@@ -2,28 +2,26 @@
 
 ## Known transitive dependency advisories
 
-`dotnet list package --vulnerable --include-transitive`
-currently reports two high-severity advisories:
+`dotnet list package --vulnerable --include-transitive` currently reports
+one high-severity advisory:
 
-- `Microsoft.OpenApi 2.0.0`
-  - GHSA-v5pm-xwqc-g5wc
-  - Transitive dependency of the ASP.NET Core OpenAPI stack.
-  - The affected Microsoft.OpenApi versions include 2.0.0.
-  - A manual upgrade to an incompatible major version is intentionally
-    avoided to prevent breaking the current ASP.NET Core OpenAPI integration.
-
-- `SQLitePCLRaw.lib.e_sqlite3 2.1.11`
+- SQLitePCLRaw.lib.e_sqlite3 2.1.11
   - GHSA-2m69-gcr7-jv3q
   - Transitive dependency of the EF Core / SQLite stack.
-  - Version 2.1.11 is affected and no patched version is listed for this
-    package line in the advisory.
+  - No patched version is currently listed in the 2.1.x line; EF Core's
+    Microsoft.EntityFrameworkCore.Sqlite still pins >= 2.1.11.
   - A manual major-version override is intentionally avoided until
     compatibility with the current EF Core stack is verified.
+
+## Resolved
+
+- Microsoft.OpenApi was upgraded from 2.0.0 to 2.7.5 (GHSA-v5pm-xwqc-g5wc),
+  resolving the advisory without breaking the ASP.NET Core OpenAPI
+  integration.
 
 ## Current mitigation
 
 Direct .NET and EF Core packages are kept on the latest compatible
-10.0.x patch versions used by this project.
-
-The remaining advisories are tracked as upstream dependency issues.
-They should be revisited when compatible upstream packages become available.
+10.0.x patch versions. The remaining advisory is tracked as an
+upstream dependency issue and will be revisited once EF Core ships
+a compatible SQLite package update.
