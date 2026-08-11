@@ -57,24 +57,27 @@ public class ProjectService
 
     public ProjectWithTasksDto? GetById(int id, int userId)
     {
-        return _db.Projects
+        var project = _db.Projects
             .Include(p => p.Tasks)
-            .Where(p => p.Id == id && p.UserId == userId)
-            .Select(p => new ProjectWithTasksDto
+            .FirstOrDefault(p => p.Id == id && p.UserId == userId);
+
+        if (project == null)
+            return null;
+
+        return new ProjectWithTasksDto
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Tasks = project.Tasks.Select(t => new TaskDto
             {
-                Id = p.Id,
-                Name = p.Name,
-                Tasks = p.Tasks.Select(t => new TaskDto
-                {
-                    Id = t.Id,
-                    ProjectId = t.ProjectId,
-                    ProjectName = p.Name,
-                    Title = t.Title,
-                    Description = t.Description,
-                    IsDone = t.IsDone
-                }).ToList()
-            })
-            .FirstOrDefault();
+                Id = t.Id,
+                ProjectId = t.ProjectId,
+                ProjectName = project.Name,
+                Title = t.Title,
+                Description = t.Description,
+                IsDone = t.IsDone
+            }).ToList()
+        };
     }
 
 }
