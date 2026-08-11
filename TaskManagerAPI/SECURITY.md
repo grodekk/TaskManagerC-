@@ -6,12 +6,13 @@
 one high-severity advisory:
 
 - SQLitePCLRaw.lib.e_sqlite3 2.1.11
-  - GHSA-2m69-gcr7-jv3q
+  - GHSA-2m69-gcr7-jv3q / CVE-2025-6965
   - Transitive dependency of the EF Core / SQLite stack.
   - No patched version is currently listed in the 2.1.x line; EF Core's
     Microsoft.EntityFrameworkCore.Sqlite still pins >= 2.1.11.
   - A manual major-version override is intentionally avoided until
     compatibility with the current EF Core stack is verified.
+  - Tracked upstream: dotnet/efcore#38257
 
 ## Resolved
 
