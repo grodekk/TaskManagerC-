@@ -69,6 +69,7 @@ public class AuthService
             SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
+            issuer: config["Jwt:Issuer"],
             claims: claims,
             expires: DateTime.Now.AddHours(1),
             signingCredentials: creds
