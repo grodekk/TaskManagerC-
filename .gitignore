@@ -1,5 +1,6 @@
 bin/
 obj/
+docker-data/
 .vs/
 *.user
 *.suo
