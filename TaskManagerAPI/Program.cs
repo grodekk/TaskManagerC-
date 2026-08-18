@@ -1,7 +1,10 @@
 using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.IdentityModel.Tokens;
 
 using Scalar.AspNetCore;
@@ -42,10 +45,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 
 var app = builder.Build();
 
-
+app.UseForwardedHeaders();
 
 app.MapOpenApi();
     
