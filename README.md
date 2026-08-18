@@ -68,7 +68,7 @@ TaskManagerAPI.Tests/
 └── IntegrationTests.cs
 ```
 
-# Main API Endpoints
+## Main API Endpoints
 
 The API provides endpoints for creating, retrieving, updating and deleting tasks, as well as updating task status and retrieving tasks belonging to a project.
 
@@ -76,17 +76,22 @@ Protected endpoints require a valid JWT bearer token.
 
 ### Authentication
 
+```text
 POST /api/auth/register
 POST /api/auth/login
+```
 
 ### Projects
 
-GET    /api/projects
-GET    /api/projects/{id}
-POST   /api/projects
+```text
+GET  /api/projects
+GET  /api/projects/{id}
+POST /api/projects
+```
 
 ### Tasks
 
+```text
 GET    /api/tasks
 GET    /api/tasks/{id}
 GET    /api/tasks/project/{projectId}
@@ -94,6 +99,7 @@ POST   /api/tasks
 PUT    /api/tasks/{id}
 PATCH  /api/tasks/{id}/status
 DELETE /api/tasks/{id}
+```
 
 ## Authentication
 
