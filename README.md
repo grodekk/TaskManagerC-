@@ -4,6 +4,14 @@ A REST API for managing users, projects and tasks, built with C# and ASP.NET Cor
 
 The application allows users to register and log in using JWT authentication. Each authenticated user can create and manage their own projects and tasks.
 
+The API is containerized with Docker and deployed to Azure Container Apps.
+
+## Live Demo
+
+The deployed API can be explored and tested using Scalar:
+
+https://taskmanager-api.wonderfultree-2214831b.polandcentral.azurecontainerapps.io/scalar/
+
 ## Features
 
 * User registration and login
@@ -15,12 +23,14 @@ The application allows users to register and log in using JWT authentication. Ea
 * Create, retrieve, update and delete tasks
 * Update task completion status
 * Entity Framework Core
-* SQLite database
 * DTO-based request and response models
 * Input validation
 * Unit tests
 * Integration tests
 * OpenAPI documentation with Scalar
+* SQLite database with persistent cloud storage
+* Docker containerization
+* Deployment to Azure Container Apps
 
 ## Tech Stack
 
@@ -34,6 +44,10 @@ The application allows users to register and log in using JWT authentication. Ea
 * xUnit
 * EF Core InMemory provider for tests
 * Scalar / OpenAPI
+* Docker
+* Azure Container Apps
+* Azure Container Registry
+* Azure Files
 
 ## Project Structure
 
@@ -79,7 +93,7 @@ GET    /api/tasks/project/{projectId}
 POST   /api/tasks
 PUT    /api/tasks/{id}
 PATCH  /api/tasks/{id}/status
-DELETE /api/tasks/{id}}
+DELETE /api/tasks/{id}
 
 ## Authentication
 
@@ -161,6 +175,21 @@ dotnet run
 
 The OpenAPI/Scalar interface can then be used to explore and test the API.
 
+## Deployment
+
+The application is containerized using Docker and deployed to Azure Container Apps.
+
+The deployment uses:
+
+* Azure Container Registry for storing the Docker image
+* Azure Container Apps for running the API
+* Azure Files for persistent SQLite database storage
+* Azure Container Apps secrets and environment variables for application configuration
+
+The SQLite database is mounted into the container through persistent Azure Files storage, allowing application data to survive container restarts and new revisions.
+
+HTTPS traffic is handled by Azure Container Apps ingress and forwarded to the ASP.NET Core application.
+
 ## Known Dependency Warning
 
 The project currently reports a NuGet security warning for the transitive dependency:
@@ -178,6 +207,13 @@ The dependency should be updated when a compatible patched version becomes avail
 
 ## Status
 
-The core API functionality, authentication, authorization and automated tests are implemented.
+The core API functionality is implemented, including authentication, authorization, project and task management, automated tests and persistent database storage.
 
-Deployment and final repository cleanup are the remaining steps.
+The application is containerized with Docker and deployed to Azure Container Apps.
+
+## Possible Future Improvements
+
+* Migration from SQLite to PostgreSQL
+* CI/CD pipeline
+* Pagination and filtering
+* Improved logging and monitoring
