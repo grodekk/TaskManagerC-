@@ -13,4 +13,9 @@ public class AppDbContext : DbContext
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<User> Users => Set<User>();
+
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<ServiceRecord> ServiceRecords => Set<ServiceRecord>();
+    public DbSet<ServiceRecordItem> ServiceRecordItems => Set<ServiceRecordItem>();
+    public DbSet<MaintenancePlan> MaintenancePlans => Set<MaintenancePlan>();
 }
