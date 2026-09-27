@@ -1,10 +1,16 @@
 # Task Manager API
 
-A REST API for managing users, projects and tasks, built with C# and ASP.NET Core.
+This project originally started as a REST API for managing users, projects and tasks, built with C# and ASP.NET Core.
 
-The application allows users to register and log in using JWT authentication. Each authenticated user can create and manage their own projects and tasks.
+It is currently being evolved into a transport and fleet management system on the `transport` branch, reusing and extending the existing backend architecture.
 
-The API is containerized with Docker and deployed to Azure Container Apps.
+The original Task Manager application remains available on the `main` branch and is deployed to Azure Container Apps.
+
+## Transport Management Development
+
+The `transport` branch currently includes vehicle management, ASP.NET Core Identity authentication, and role-based access control with `Admin`, `Employee`, and `Viewer` roles.
+
+Planned development currently focuses on vehicle maintenance and service history.
 
 ## Live Demo
 
