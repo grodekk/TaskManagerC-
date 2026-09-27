@@ -37,6 +37,7 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Employee")]
     public IActionResult Create(CreateVehicleDto dto)
     {
         var vehicle = _service.Create(dto);
@@ -51,6 +52,7 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Employee")]
     public IActionResult Update(int id, UpdateVehicleDto dto)
     {
         var updated = _service.Update(id, dto);
@@ -62,6 +64,7 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
         var deleted = _service.Delete(id);
