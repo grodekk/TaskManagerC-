@@ -36,6 +36,9 @@ public class ServiceRecordsController : ControllerBase
     {
         var serviceRecords = await _service.GetForVehicleAsync(vehicleId);
 
+        if (serviceRecords is null)
+            return NotFound();
+
         return Ok(serviceRecords);
     }
 }

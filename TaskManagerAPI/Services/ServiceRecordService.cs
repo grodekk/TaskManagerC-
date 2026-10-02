@@ -54,8 +54,14 @@ public class ServiceRecordService
         };
     }
 
-    public async Task<List<ServiceRecordDto>> GetForVehicleAsync(int vehicleId)
+    public async Task<List<ServiceRecordDto>?> GetForVehicleAsync(int vehicleId)
     {
+        var vehicleExists = await _context.Vehicles
+            .AnyAsync(v => v.Id == vehicleId);
+
+        if (!vehicleExists)
+            return null;
+
         return await _context.ServiceRecords
             .Where(r => r.VehicleId == vehicleId)
             .OrderByDescending(r => r.PerformedOn)
