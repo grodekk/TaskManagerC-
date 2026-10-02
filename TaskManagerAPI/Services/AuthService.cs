@@ -33,15 +33,7 @@ public class AuthService
 
         var result = await _userManager.CreateAsync(user, dto.Password);
 
-        if (!result.Succeeded)
-            return result;
-
-        var roleResult = await _userManager.AddToRoleAsync(user, "Viewer");
-
-        if (!roleResult.Succeeded)
-            return roleResult;
-
-        return IdentityResult.Success;
+        return result;
     }
 
     public async Task<ApplicationUser?> LoginAsync(LoginDto dto)

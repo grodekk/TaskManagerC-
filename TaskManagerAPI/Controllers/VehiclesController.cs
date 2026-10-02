@@ -5,7 +5,7 @@ using TaskManagerAPI.Services;
 
 namespace TaskManagerAPI.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin,Employee,Viewer")]
 [ApiController]
 [Route("api/vehicles")]
 public class VehiclesController : ControllerBase

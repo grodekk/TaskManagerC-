@@ -25,6 +25,11 @@ public class UserService
         if (user == null)
             return UpdateRoleResult.UserNotFound;
 
+        var allowedRoles = new[] { "Viewer", "Employee" };
+
+        if (!allowedRoles.Contains(newRole))
+            return UpdateRoleResult.InvalidRole;
+
         var roleExists = await _roleManager.RoleExistsAsync(newRole);
 
         if (!roleExists)

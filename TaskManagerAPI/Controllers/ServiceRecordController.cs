@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskManagerAPI.Controllers;
 
+[Authorize(Roles = "Admin,Employee,Viewer")]
 [ApiController]
 [Route("api/vehicles/{vehicleId}/service-records")]
 public class ServiceRecordsController : ControllerBase
@@ -15,6 +17,7 @@ public class ServiceRecordsController : ControllerBase
         _service = service;
     }
 
+    [Authorize(Roles = "Admin,Employee")]
     [HttpPost]
     public async Task<ActionResult<ServiceRecordDto>> Create(int vehicleId, ServiceRecordCreateDto dto)
     {
