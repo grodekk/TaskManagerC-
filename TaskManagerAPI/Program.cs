@@ -46,6 +46,7 @@ builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ServiceRecordService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
