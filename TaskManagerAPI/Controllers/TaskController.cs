@@ -17,8 +17,7 @@ public class TasksController : ControllerBase
     private readonly TaskService _service;
 
     public TasksController(TaskService service)
-    {
-        _service = service;
+    {q
     }
 
     private int GetUserId()

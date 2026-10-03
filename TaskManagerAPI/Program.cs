@@ -41,8 +41,6 @@ builder.Services.AddOpenApi(options =>
     options.AddOperationTransformer<AuthOperationTransformer>();
 });
 builder.Services.AddControllers();
-builder.Services.AddScoped<TaskService>();
-builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();

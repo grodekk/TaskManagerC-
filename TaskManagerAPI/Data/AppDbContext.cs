@@ -11,9 +11,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
     }
 
-    public DbSet<TaskItem> Tasks => Set<TaskItem>();
-    public DbSet<Project> Projects => Set<Project>();
-
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<ServiceRecord> ServiceRecords => Set<ServiceRecord>();
     public DbSet<ServiceRecordItem> ServiceRecordItems => Set<ServiceRecordItem>();
@@ -22,8 +19,5 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
-        builder.Entity<User>()
-            .ToTable("Users");
     }
 }
