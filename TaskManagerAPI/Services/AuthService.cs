@@ -21,6 +21,7 @@ public class AuthService
     public async Task<bool> UserExistsAsync(string username)
     {
         var user = await _userManager.FindByNameAsync(username);
+
         return user != null;
     }
 
