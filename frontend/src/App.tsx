@@ -1,41 +1,28 @@
 import { useState, type SubmitEvent } from 'react'
+import { login } from './api/authApi'
+import { getVehicles } from './api/vehicleApi'
+import type { Vehicle } from './types/vehicle'
 
 function App() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const apiUrl = import.meta.env.VITE_API_URL
+    try {
+      const loginData = await login(username, password)
 
-    const response = await fetch(`${apiUrl}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    })
+      localStorage.setItem('token', loginData.token)
 
-  if (!response.ok) {
-    const error = await response.text()
+      const vehicleData = await getVehicles(loginData.token)
 
-    console.log(response.status)
-    console.log(error)
-
-    return
+      setVehicles(vehicleData)
+    } catch (error) {
+      console.log(error)
+    }
   }
-
-  const data = await response.json()
-
-  localStorage.setItem('token', data.token)
-
-  console.log('Logged in')
-}
-  
 
   return (
     <div>
@@ -62,6 +49,14 @@ function App() {
 
         <button type="submit">Login</button>
       </form>
+
+      <h2>Vehicles</h2>
+
+      {vehicles.map((vehicle) => (
+        <div key={vehicle.id}>
+          {vehicle.registrationNumber}
+        </div>
+      ))}
     </div>
   )
 }
