@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManagerAPI.Data;
 
@@ -10,9 +11,11 @@ using TaskManagerAPI.Data;
 namespace TaskManagerAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926003345_AddIdentity")]
+    partial class AddIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
@@ -238,6 +241,26 @@ namespace TaskManagerAPI.Migrations
                     b.ToTable("MaintenancePlans");
                 });
 
+            modelBuilder.Entity("TaskManagerAPI.Models.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Projects");
+                });
+
             modelBuilder.Entity("TaskManagerAPI.Models.ServiceRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -278,6 +301,51 @@ namespace TaskManagerAPI.Migrations
                     b.HasIndex("ServiceRecordId");
 
                     b.ToTable("ServiceRecordItems");
+                });
+
+            modelBuilder.Entity("TaskManagerAPI.Models.TaskItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("TaskManagerAPI.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("TaskManagerAPI.Models.Vehicle", b =>
@@ -363,6 +431,17 @@ namespace TaskManagerAPI.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("TaskManagerAPI.Models.Project", b =>
+                {
+                    b.HasOne("TaskManagerAPI.Models.User", "User")
+                        .WithMany("Projects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TaskManagerAPI.Models.ServiceRecord", b =>
                 {
                     b.HasOne("TaskManagerAPI.Models.Vehicle", "Vehicle")
@@ -385,9 +464,30 @@ namespace TaskManagerAPI.Migrations
                     b.Navigation("ServiceRecord");
                 });
 
+            modelBuilder.Entity("TaskManagerAPI.Models.TaskItem", b =>
+                {
+                    b.HasOne("TaskManagerAPI.Models.Project", "Project")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("TaskManagerAPI.Models.Project", b =>
+                {
+                    b.Navigation("Tasks");
+                });
+
             modelBuilder.Entity("TaskManagerAPI.Models.ServiceRecord", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("TaskManagerAPI.Models.User", b =>
+                {
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("TaskManagerAPI.Models.Vehicle", b =>

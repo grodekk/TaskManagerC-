@@ -5,46 +5,46 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace TaskManagerAPI.Services;
 
 public class AuthService
 {
-    private readonly AppDbContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public AuthService(AppDbContext db)
+    public AuthService(UserManager<ApplicationUser> userManager)
     {
-        _db = db;
+        _userManager = userManager;
     }
 
-    public bool UserExists(string username)
-        => _db.Users.Any(u => u.Username == username);
-
-    public void Register(RegisterDto dto)
+    public async Task<bool> UserExistsAsync(string username)
     {
-        var user = new User
+        var user = await _userManager.FindByNameAsync(username);
+
+        return user != null;
+    }
+
+    public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
+    {
+        var user = new ApplicationUser
         {
-            Username = dto.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            UserName = dto.Username
         };
 
-        _db.Users.Add(user);
-        _db.SaveChanges();
+        var result = await _userManager.CreateAsync(user, dto.Password);
+
+        return result;
     }
 
-
-    public User? Login(LoginDto dto)
+    public async Task<ApplicationUser?> LoginAsync(LoginDto dto)
     {
-        var user = _db.Users
-            .FirstOrDefault(u => u.Username == dto.Username);
+        var user = await _userManager.FindByNameAsync(dto.Username);
 
         if (user == null)
             return null;
 
-        var isValid = BCrypt.Net.BCrypt.Verify(
-            dto.Password,
-            user.PasswordHash
-        );
+        var isValid = await _userManager.CheckPasswordAsync(user, dto.Password);
 
         if (!isValid)
             return null;
@@ -53,13 +53,20 @@ public class AuthService
     }
 
 
-    public string GenerateToken(User user, IConfiguration config)
-    {
-        var claims = new[]
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Username)
-    };
+    public async Task<string> GenerateTokenAsync(ApplicationUser user, IConfiguration config)
+    {        
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.UserName!)
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
@@ -71,7 +78,7 @@ public class AuthService
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],
             claims: claims,
-            expires: DateTime.Now.AddHours(1),
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds
         );
 

@@ -20,25 +20,28 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public IActionResult Register(RegisterDto dto)
+    public async Task<IActionResult> Register(RegisterDto dto)
     {
-        if (_service.UserExists(dto.Username))
+        if (await _service.UserExistsAsync(dto.Username))
             return BadRequest("User already exists");
 
-        _service.Register(dto);
+        var result = await _service.RegisterAsync(dto);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
 
         return Ok("User created");
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginDto dto)
+    public async Task<IActionResult> Login(LoginDto dto)
     {
-        var user = _service.Login(dto);
+        var user = await _service.LoginAsync(dto);
 
         if (user == null)
             return Unauthorized("Invalid credentials");
 
-        var token = _service.GenerateToken(user, _config);
+        var token = await _service.GenerateTokenAsync(user, _config);
 
         return Ok(new { token });
     }

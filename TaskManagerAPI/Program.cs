@@ -3,6 +3,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 
+using Microsoft.AspNetCore.Identity;
+using TaskManagerAPI.Models;
+
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.IdentityModel.Tokens;
@@ -38,12 +41,19 @@ builder.Services.AddOpenApi(options =>
     options.AddOperationTransformer<AuthOperationTransformer>();
 });
 builder.Services.AddControllers();
-builder.Services.AddScoped<TaskService>();
-builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ServiceRecordService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services
+    .AddIdentityCore<ApplicationUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -57,6 +67,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 
 var app = builder.Build();
+
+await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
 
 app.UseForwardedHeaders();
 

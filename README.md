@@ -1,84 +1,56 @@
-# Task Manager API
+# Fleet Management API
 
-This project originally started as a REST API for managing users, projects and tasks, built with C# and ASP.NET Core.
+REST API for fleet and vehicle management built with C# and ASP.NET Core.
 
-It is currently being evolved into a transport and fleet management system on the `transport` branch, reusing and extending the existing backend architecture.
+The project originally started as a Task Manager API and is now being developed as a transport-focused fleet management application.
 
-The original Task Manager application remains available on the `main` branch and is deployed to Azure Container Apps.
+The legacy Task Manager version remains deployed on Azure, while the current codebase contains the new fleet management backend.
 
-## Transport Management Development
+## Legacy Live Demo
 
-The `transport` branch currently includes vehicle management, ASP.NET Core Identity authentication, and role-based access control with `Admin`, `Employee`, and `Viewer` roles.
-
-Planned development currently focuses on vehicle maintenance and service history.
-
-## Live Demo
-
-The deployed API can be explored and tested using Scalar:
+The currently deployed Azure application still represents the original Task Manager version:
 
 https://taskmanager-api.wonderfultree-2214831b.polandcentral.azurecontainerapps.io/scalar/
 
-## Features
+The current Fleet Management version has not yet replaced the legacy deployment.
 
-* User registration and login
-* JWT authentication
-* Password hashing
-* User-specific project ownership
-* User-specific task access
-* Create and retrieve projects
-* Create, retrieve, update and delete tasks
-* Update task completion status
-* Entity Framework Core
-* DTO-based request and response models
-* Input validation
-* Unit tests
-* Integration tests
-* OpenAPI documentation with Scalar
-* SQLite database with persistent cloud storage
-* Docker containerization
-* Deployment to Azure Container Apps
+## Current Features
 
-## Tech Stack
+- User registration and login
+- JWT authentication
+- Role-based authorization
+- `Admin`, `Employee` and `Viewer` roles
+- Administrative user role management
+- Vehicle management
+- Vehicle service history
+- Multiple service items per service record
+- Initial role and admin seeding
 
-* C#
-* .NET 10
-* ASP.NET Core Web API
-* Entity Framework Core
-* SQLite
-* JWT Bearer Authentication
-* BCrypt
-* xUnit
-* EF Core InMemory provider for tests
-* Scalar / OpenAPI
-* Docker
-* Azure Container Apps
-* Azure Container Registry
-* Azure Files
 
-## Project Structure
+## Roles
 
-```text
-TaskManagerAPI/
-├── Controllers/
-├── Data/
-├── DTOs/
-├── Models/
-├── Services/
-├── Migrations/
-└── Program.cs
+### Admin
 
-TaskManagerAPI.Tests/
-├── AuthServiceTests.cs
-├── ProjectServiceTests.cs
-├── TaskServiceTests.cs
-└── IntegrationTests.cs
-```
+- View and manage vehicles
+- View and add service records
+- View users
+- Assign `Viewer` and `Employee` roles
 
-## Main API Endpoints
+### Employee
 
-The API provides endpoints for creating, retrieving, updating and deleting tasks, as well as updating task status and retrieving tasks belonging to a project.
+- View and manage vehicles
+- View and add service records
 
-Protected endpoints require a valid JWT bearer token.
+### Viewer
+
+- View vehicles
+- View service history
+
+Newly registered users do not receive fleet access automatically.
+
+An administrator must assign an appropriate role before the user can access fleet resources.
+
+## API Endpoints
 
 ### Authentication
 
@@ -87,65 +59,55 @@ POST /api/auth/register
 POST /api/auth/login
 ```
 
-### Projects
+### Users
 
 ```text
-GET  /api/projects
-GET  /api/projects/{id}
-POST /api/projects
+GET /api/users
+PUT /api/users/{id}/role
 ```
 
-### Tasks
+Admin only.
+
+### Vehicles
 
 ```text
-GET    /api/tasks
-GET    /api/tasks/{id}
-GET    /api/tasks/project/{projectId}
-POST   /api/tasks
-PUT    /api/tasks/{id}
-PATCH  /api/tasks/{id}/status
-DELETE /api/tasks/{id}
+GET  /api/vehicles
+GET  /api/vehicles/{id}
+POST /api/vehicles
+PUT  /api/vehicles/{id}
+DELETE /api/vehicles/{id}
 ```
 
-## Authentication
-
-After a successful login, the API returns a JWT token.
-
-The token should be included in protected requests using the Authorization header:
+### Service History
 
 ```text
-Authorization: Bearer <token>
+GET  /api/vehicles/{vehicleId}/service-records
+POST /api/vehicles/{vehicleId}/service-records
 ```
 
-The authenticated user's ID is obtained from the token and is used to restrict access to resources owned by that user.
+## Current Tech Stack
+
+- C#
+- .NET 10
+- ASP.NET Core Web API
+- ASP.NET Core Identity
+- Entity Framework Core
+- SQLite
+- JWT Bearer Authentication
+- Scalar / OpenAPI
+- xUnit
 
 ## Data Model
 
-The main relationship is:
+The service history model uses the following relationship:
 
 ```text
-User
- └── Projects
-      └── Tasks
+Vehicle
+└── ServiceRecord
+    └── ServiceRecordItem
 ```
 
-A project belongs to a user, and a task belongs to a project.
-
-The service layer verifies ownership so that authenticated users can access only their own resources.
-
-## Tests
-
-The project contains both unit and integration tests.
-
-Unit tests verify the business logic implemented in the service layer.
-
-Integration tests verify complete HTTP request flows including authentication, authorization, controllers, services and database access.
-
-Run the tests with:
-
-```bash
-dotnet test
-```
+This allows one service event to contain multiple performed maintenance operations.
 
 ## Running Locally
 
@@ -167,9 +129,13 @@ Restore dependencies:
 dotnet restore
 ```
 
-## Configuration
+Apply migrations:
 
-Before running the application, set the JWT signing key using .NET User Secrets:
+```bash
+dotnet ef database update
+```
+
+Configure JWT:
 
 ```bash
 dotnet user-secrets init
@@ -177,7 +143,12 @@ dotnet user-secrets set "Jwt:Key" "your-long-random-secret-key-min-32-chars"
 dotnet user-secrets set "Jwt:Issuer" "TaskManagerAPI"
 ```
 
-The key must be at least 32 characters long (256 bits) to satisfy the HMAC SHA-256 algorithm requirements.
+Configure the initial administrator:
+
+```bash
+dotnet user-secrets set "Admin:Username" "admin"
+dotnet user-secrets set "Admin:Password" "your-strong-admin-password"
+```
 
 Run the application:
 
@@ -185,47 +156,64 @@ Run the application:
 dotnet run
 ```
 
-The OpenAPI/Scalar interface can then be used to explore and test the API.
+The application automatically creates the `Admin`, `Employee` and `Viewer` roles.
 
-## Deployment
+If administrator credentials are configured, the initial Admin account is also created automatically.
 
-The application is containerized using Docker and deployed to Azure Container Apps.
 
-The deployment uses:
 
-* Azure Container Registry for storing the Docker image
-* Azure Container Apps for running the API
-* Azure Files for persistent SQLite database storage
-* Azure Container Apps secrets and environment variables for application configuration
+## Legacy Deployment Stack
 
-The SQLite database is mounted into the container through persistent Azure Files storage, allowing application data to survive container restarts and new revisions.
+The original Task Manager version was containerized and deployed using:
 
-HTTPS traffic is handled by Azure Container Apps ingress and forwarded to the ASP.NET Core application.
+- Docker
+- Azure Container Registry
+- Azure Container Apps
+- Azure Files
+- Azure environment variables and secrets
+
+The Fleet Management version is planned to use separate environments:
+
+```text
+Demo
+→ separate application instance
+→ separate database
+→ predefined users and fleet data
+
+Production
+→ separate application instance
+→ separate database
+→ no demo data
+```
+
+## Next Development Stage
+
+A TypeScript frontend is planned next.
+
+Initial frontend scope:
+
+- Login
+- Vehicle list
+- Vehicle details
+- Service history
+- Adding service records
+- User and role management for Admin
+
+Further backend development may include:
+
+- Maintenance planning
+- Insurance and document tracking
+- PostgreSQL migration
+- CI/CD
+- Filtering and pagination
 
 ## Known Dependency Warning
 
-The project currently reports a NuGet security warning for the transitive dependency:
+The project currently reports a security warning for the transitive dependency:
 
 ```text
 SQLitePCLRaw.lib.e_sqlite3 2.1.11
 GHSA-2m69-gcr7-jv3q / CVE-2025-6965
 ```
 
-The dependency is part of the EF Core / SQLite stack.
-
-A manual major-version override is intentionally avoided until compatibility with the current EF Core stack is verified.
-
-The dependency should be updated when a compatible patched version becomes available.
-
-## Status
-
-The core API functionality is implemented, including authentication, authorization, project and task management, automated tests and persistent database storage.
-
-The application is containerized with Docker and deployed to Azure Container Apps.
-
-## Possible Future Improvements
-
-* Migration from SQLite to PostgreSQL
-* CI/CD pipeline
-* Pagination and filtering
-* Improved logging and monitoring
+The dependency is part of the EF Core / SQLite stack and should be updated after compatibility with a patched version is verified.

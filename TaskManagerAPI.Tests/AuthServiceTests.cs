@@ -1,7 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using TaskManagerAPI.Data;
-using TaskManagerAPI.DTOs;
-using TaskManagerAPI.Models;
+﻿using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
 
 namespace TaskManagerAPI.Tests;
@@ -9,96 +6,110 @@ namespace TaskManagerAPI.Tests;
 public class AuthServiceTests
 {
     [Fact]
-    public void Login_ReturnsUser_WhenCredentialsAreValid()
+    public async Task RegisterAsync_CreatesUserWithHashedPassword()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        using var database = new TestDatabase();
 
-        using var db = new AppDbContext(options);
+        var service = new AuthService(database.Users);
 
-        var user = new User
+        var dto = new RegisterDto
         {
-            Username = "testuser",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123")
+            Username = "newuser",
+            Password = "Password123!"
         };
 
-        db.Users.Add(user);
-        db.SaveChanges();
+        // Act
+        var result = await service.RegisterAsync(dto);
 
-        var service = new AuthService(db);
+        // Assert
+        Assert.True(result.Succeeded);
+
+        var user = await database.Users.FindByNameAsync(dto.Username);
+        Assert.NotNull(user);
+
+        var passwordIsValid =
+            await database.Users.CheckPasswordAsync(user, dto.Password);
+
+        Assert.True(passwordIsValid);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_DoesNotAssignAnyRole()
+    {
+        // Arrange
+        using var database = new TestDatabase();
+
+        await database.CreateRolesAsync();
+
+        var service = new AuthService(database.Users);
+
+        var dto = new RegisterDto
+        {
+            Username = "newuser",
+            Password = "Password123!"
+        };
+
+        // Act
+        var result = await service.RegisterAsync(dto);
+
+        // Assert
+        Assert.True(result.Succeeded);
+
+        var user = await database.Users.FindByNameAsync(dto.Username);
+        Assert.NotNull(user);
+
+        var roles = await database.Users.GetRolesAsync(user);
+
+        Assert.Empty(roles);
+    }
+
+    [Fact]
+    public async Task LoginAsync_ReturnsUser_WhenCredentialsAreValid()
+    {
+        // Arrange
+        using var database = new TestDatabase();
+
+        var expectedUser = await database.CreateUserAsync();
+
+        var service = new AuthService(database.Users);
 
         var dto = new LoginDto
         {
             Username = "testuser",
-            Password = "password123"
+            Password = "Password123!"
         };
 
         // Act
-        var result = service.Login(dto);
+        var result = await service.LoginAsync(dto);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("testuser", result.Username);
+        Assert.Equal(expectedUser.Id, result.Id);
     }
 
-
-    [Fact]
-    public void Login_ReturnsNull_WhenUserDoesNotExist()
+    [Theory]
+    [InlineData("testuser", "WrongPassword123!")]
+    [InlineData("missing", "Password123!")]
+    public async Task LoginAsync_ReturnsNull_WhenCredentialsAreInvalid(
+        string username,
+        string password)
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        using var database = new TestDatabase();
 
-        using var db = new AppDbContext(options);
+        await database.CreateUserAsync();
 
-        var service = new AuthService(db);
+        var service = new AuthService(database.Users);
 
         var dto = new LoginDto
         {
-            Username = "nonexistent",
-            Password = "password123"
+            Username = username,
+            Password = password
         };
 
         // Act
-        var result = service.Login(dto);
-
-        // Assert
-        Assert.Null(result);
-    }
-
-
-    [Fact]
-    public void Login_ReturnsNull_WhenPasswordIsInvalid()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        using var db = new AppDbContext(options);
-
-        var user = new User
-        {
-            Username = "testuser",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123")
-        };
-
-        db.Users.Add(user);
-        db.SaveChanges();
-
-        var service = new AuthService(db);
-
-        var dto = new LoginDto
-        {
-            Username = "testuser",
-            Password = "wrongpassword"
-        };
-
-        // Act
-        var result = service.Login(dto);
+        var result = await service.LoginAsync(dto);
 
         // Assert
         Assert.Null(result);
