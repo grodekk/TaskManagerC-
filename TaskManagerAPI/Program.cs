@@ -65,6 +65,16 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -79,6 +89,7 @@ app.MapScalarApiReference(options =>
     options.WithOpenApiRoutePattern("/openapi/v1.json");
 });
 
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
