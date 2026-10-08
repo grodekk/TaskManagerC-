@@ -2,11 +2,20 @@ import { useState, type SubmitEvent } from 'react'
 import { login } from './api/authApi'
 import { getVehicles } from './api/vehicleApi'
 import type { Vehicle } from './types/vehicle'
+import { getServiceRecords } from './api/serviceRecordApi'
+import type { ServiceRecord } from './types/ServiceRecord'
+import LoginForm from './components/LoginForm'
+import VehicleList from './components/VehicleList'
+import ServiceHistory from './components/ServiceHistory'
 
 function App() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [serviceRecords, setServiceRecords] = useState<ServiceRecord[]>([])
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -15,6 +24,7 @@ function App() {
       const loginData = await login(username, password)
 
       localStorage.setItem('token', loginData.token)
+      setIsLoggedIn(true)
 
       const vehicleData = await getVehicles(loginData.token)
 
@@ -24,39 +34,53 @@ function App() {
     }
   }
 
+
+  async function handleVehicleClick(vehicleId: number) {
+    const token = localStorage.getItem('token')
+
+    if (!token) {
+      return
+    }
+
+    try {
+      const records = await getServiceRecords(vehicleId, token)
+
+      setSelectedVehicleId(vehicleId)
+      setServiceRecords(records)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
   return (
     <div>
       <h1>Fleet Management</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
+      {!isLoggedIn && (
+        <LoginForm
+          username={username}
+          password={password}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          onSubmit={handleSubmit}
+        />
+      )}
+
+      {isLoggedIn && (
+        <>
+          <VehicleList
+            vehicles={vehicles}
+            onVehicleClick={handleVehicleClick}
           />
-        </div>
 
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
+          <ServiceHistory
+            records={serviceRecords}
+            visible={selectedVehicleId !== null}
           />
-        </div>
+        </>
+      )}
 
-        <button type="submit">Login</button>
-      </form>
-
-      <h2>Vehicles</h2>
-
-      {vehicles.map((vehicle) => (
-        <div key={vehicle.id}>
-          {vehicle.registrationNumber}
-        </div>
-      ))}
     </div>
   )
 }
