@@ -25,6 +25,7 @@ function RegisterForm({
           type="text"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
+          required
         />
       </div>
 
@@ -34,6 +35,7 @@ function RegisterForm({
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          required
         />
       </div>
 

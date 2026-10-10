@@ -5,10 +5,9 @@ namespace TaskManagerAPI.DTOs;
 public class RegisterDto
 {
 	[Required]
-	[MinLength(3)]
-	public required string Username { get; set; }
+    [MinLength(3, ErrorMessage = "Username must be at least 3 characters long.")]
+    public required string Username { get; set; }
 
-	[Required]
-	[MinLength(8)]
+	[Required]	
 	public required string Password { get; set; }
 }

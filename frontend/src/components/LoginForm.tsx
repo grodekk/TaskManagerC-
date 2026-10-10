@@ -23,6 +23,7 @@ function LoginForm({
           type="text"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
+          required
         />
       </div>
 
@@ -32,6 +33,7 @@ function LoginForm({
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          required
         />
       </div>
       
