@@ -2,8 +2,9 @@ using System.Text;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+
 using TaskManagerAPI.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using Scalar.AspNetCore;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.Services;
 using TaskManagerAPI.OpenApi;
+using TaskManagerAPI.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +65,25 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var message = context.ModelState.Values
+            .SelectMany(value => value.Errors)
+            .Select(error => error.ErrorMessage)
+            .FirstOrDefault() ?? "Validation failed.";
+
+        var response = new ApiErrorResponse
+        {
+            Code = "validation_error",
+            Message = message
+        };
+
+        return new BadRequestObjectResult(response);
+    };
 });
 
 builder.Services.AddCors(options =>

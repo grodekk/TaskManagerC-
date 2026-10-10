@@ -9,6 +9,10 @@ export async function getVehicles(token: string): Promise<Vehicle[]> {
     }
   })
 
+  if (response.status === 403) {
+  throw new Error('You do not have permission to view vehicle records.')
+  }
+
   if (!response.ok) {
     throw new Error(`Failed to load vehicles: ${response.status}`)
   }
